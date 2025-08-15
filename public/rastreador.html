@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Rastreador em Tempo Real</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<style>
+  #map { height: 100vh; width: 100%; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  // Inicializa o mapa centralizado em algum ponto inicial
+  var map = L.map('map').setView([-3.12, -60.02], 13);
+
+  // Camada do mapa
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Marcador verde
+  var marker = L.marker([-3.12, -60.02], {icon: L.icon({iconUrl: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png', iconSize:[32,32]})}).addTo(map)
+    .bindPopup('Celular')
+    .openPopup();
+
+  // Função para atualizar localização
+  async function atualizarLocalizacao() {
+    try {
+      const response = await fetch('https://server-vbp9.onrender.com/location');
+      const data = await response.json();
+      const lat = data.lat;
+      const lng = data.lng;
+
+      // Move o marcador
+      marker.setLatLng([lat, lng]);
+
+      // Centraliza o mapa na nova posição
+      map.setView([lat, lng], map.getZoom());
+    } catch (err) {
+      console.error('Erro ao atualizar localização:', err);
+    }
+  }
+
+  // Atualiza a cada 5 segundos
+  setInterval(atualizarLocalizacao, 5000);
+</script>
+</body>
+</html>
