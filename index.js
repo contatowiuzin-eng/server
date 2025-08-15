@@ -1,12 +1,14 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-
 const PORT = process.env.PORT || 10000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Servir arquivos estáticos da pasta 'public'
+app.use(express.static("public"));
 
 // Armazenamento em memória (temporário)
 let locations = [];
@@ -37,6 +39,12 @@ app.get("/locations", (req, res) => {
   res.json(locations);
 });
 
+// Exemplo de coordenadas fixas (para teste do rastreador.html)
+app.get("/location", (req, res) => {
+  res.json({ lat: -3.12, lng: -60.02 });
+});
+
+// Inicializar servidor
 app.listen(PORT, () => {
   console.log("========================================");
   console.log(`✅ Servidor rodando na porta ${PORT}`);
