@@ -1,31 +1,45 @@
 const express = require("express");
-const bodyParser = require("body-parser");
 const cors = require("cors");
-
 const app = express();
+
 const PORT = process.env.PORT || 10000;
 
+// Middleware
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-let lastLocation = null; // armazenar última localização
+// Armazenamento em memória (temporário)
+let locations = [];
+
+// Rota de teste
+app.get("/", (req, res) => {
+  res.send("Servidor de monitoramento rodando!");
+});
 
 // Receber localização do app
 app.post("/location", (req, res) => {
-  const { lat, lng } = req.body;
-  if (!lat || !lng) {
-    return res.status(400).json({ error: "Lat/Lng são obrigatórios" });
+  const { lat, lng, device } = req.body;
+
+  if (!lat || !lng || !device) {
+    return res.status(400).json({ status: "error", message: "Dados incompletos" });
   }
-  lastLocation = { lat, lng, timestamp: new Date() };
-  res.json({ status: "ok", lastLocation });
+
+  const timestamp = new Date().toISOString();
+  locations.push({ device, lat, lng, timestamp });
+
+  console.log(`[📍] ${device} - Lat: ${lat}, Lng: ${lng} - ${timestamp}`);
+
+  res.json({ status: "ok", lat, lng, device, timestamp });
 });
 
-// Retornar última localização
-app.get("/location", (req, res) => {
-  if (!lastLocation) return res.json({ status: "vazio" });
-  res.json(lastLocation);
+// Retornar todas as localizações
+app.get("/locations", (req, res) => {
+  res.json(locations);
 });
 
 app.listen(PORT, () => {
-  console.log(`Server rodando em http://localhost:${PORT}`);
+  console.log("========================================");
+  console.log(`✅ Servidor rodando na porta ${PORT}`);
+  console.log(`🌐 URL principal: https://server-vbp9.onrender.com`);
+  console.log("========================================");
 });
